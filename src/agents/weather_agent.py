@@ -19,18 +19,6 @@ basellm = BaseLLM(model_name='qwen')
 # 配置 LLM
 llm = basellm.get_llm('qwen')
 
-agent = create_react_agent(
-    model=llm, # 目前没有豆包的，但是使用openai的格式是可以调通的
-    tools=[get_weather],
-    prompt="You are a helpful assistant",
-)
-
-res = agent.invoke(
-    {"messages": [{"role": "user", "content": "北京的天气如何？"}]}
-)
-print(res)
-sys.exit(0)
-
 
 # 定义 ReAct Prompt
 template = '''你是一个智能助手。请回答用户的问题。
