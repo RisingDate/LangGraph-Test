@@ -1,6 +1,8 @@
-import json
-import requests
-
+"""
+    测试API是否存活
+"""
+import os
+import sys
 from dotenv import load_dotenv
 from openai import OpenAI
 
@@ -55,21 +57,39 @@ model_name = [
     'gpt-5-chat-latest'
 ]
 
+
 client = OpenAI(
-    base_url="http://127.0.0.1:8500/v1",
-    api_key="aaaaaaa"
+    api_key=os.getenv("LOCAL_API_KEY"),
+    base_url=os.getenv("QWEN_BASE_URL")
 )
-response = None
-print('test begin')
+
+print('test begin', flush=True)
+messages = [
+    {"role": "user", "content": "天津大学怎么样。"}
+]
+print("Stream Output:", flush=True)
+
 try:
     response = client.chat.completions.create(
-        model="",
-        messages=[
-            {"role": "user", "content": "天津大学怎么样。"}
-        ],
+        model="qwen3.5-122b-a10b:q8",
+        messages=messages,
+        temperature=0.7,
+        stream=True,
+        top_p=0.8,
+        presence_penalty=1.5,
+        extra_body={
+            "top_k": 20,
+            "chat_template_kwargs": {"enable_thinking": True}
+        }
     )
-    # print(response)
-    print(response.choices[0].message.content)
+
+    for chunk in response:
+        if chunk.choices and len(chunk.choices) > 0:
+            content = chunk.choices[0].delta.content
+            if content:
+                print(content, end="", flush=True)
+    print(flush=True)
 
 except Exception as e:
-    print(e)
+    print(f"\nRequest Error: {e}", flush=True)
+
